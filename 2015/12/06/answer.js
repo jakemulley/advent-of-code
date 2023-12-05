@@ -11,31 +11,51 @@ const input = (await getInput(import.meta.url)).map((row) => {
   };
 });
 
-// Part 1
-const part1Grid = Array(1000)
-  .fill()
-  .map((row) => Array(1000).fill(0));
+function processInstructions(input, isBrightness) {
+  const grid = Array(1000)
+    .fill()
+    .map((row) => Array(1000).fill(0));
 
-const part1Preparation = input.forEach((row) => {
-  const [from, to] = row.coords;
-  const { action } = row;
+  input.forEach((row) => {
+    const [from, to] = row.coords;
+    const { action } = row;
 
-  for (let y = from[1]; y <= to[1]; y++) {
-    for (let x = from[0]; x <= to[0]; x++) {
-      if (action === "toggle") {
-        part1Grid[y][x] = !part1Grid[y][x];
-      }
-      if (action.endsWith("on")) {
-        part1Grid[y][x] = true;
-      }
-      if (action.endsWith("off")) {
-        part1Grid[y][x] = false;
+    for (let y = from[1]; y <= to[1]; y++) {
+      for (let x = from[0]; x <= to[0]; x++) {
+        if (action === "toggle") {
+          if (isBrightness) {
+            grid[y][x] += 2;
+          } else {
+            grid[y][x] = !grid[y][x];
+          }
+        }
+        if (action.endsWith("on")) {
+          if (isBrightness) {
+            grid[y][x] += 1;
+          } else {
+            grid[y][x] = true;
+          }
+        }
+        if (action.endsWith("off")) {
+          if (isBrightness) {
+            grid[y][x] -= 1;
+          } else {
+            grid[y][x] = false;
+          }
+        }
+
+        if (isBrightness && grid[y][x] < 0) {
+          grid[y][x] = 0;
+        }
       }
     }
-  }
-});
+  });
 
-const part1 = part1Grid.reduce(
+  return grid;
+}
+
+// Part 1
+const part1 = processInstructions(input, false).reduce(
   (accumulator, currentValue) =>
     accumulator +
     Number.parseInt(currentValue.filter((row) => row === true).length),
@@ -45,33 +65,7 @@ const part1 = part1Grid.reduce(
 console.log("Answer one:", part1);
 
 // Part 2
-const part2Grid = Array(1000)
-  .fill()
-  .map((row) => Array(1000).fill(0));
-
-const part2Preparation = input.forEach((row) => {
-  const [from, to] = row.coords;
-  const { action } = row;
-
-  for (let y = from[1]; y <= to[1]; y++) {
-    for (let x = from[0]; x <= to[0]; x++) {
-      if (action === "toggle") {
-        part2Grid[y][x] += 2;
-      }
-      if (action.endsWith("on")) {
-        part2Grid[y][x] += 1;
-      }
-      if (action.endsWith("off")) {
-        part2Grid[y][x] -= 1;
-      }
-      if (part2Grid[y][x] < 0) {
-        part2Grid[y][x] = 0;
-      }
-    }
-  }
-});
-
-const part2 = part2Grid.reduce(
+const part2 = processInstructions(input, true).reduce(
   (accumulator, currentValue) =>
     accumulator +
     Number.parseInt(
